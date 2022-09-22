@@ -1,0 +1,111 @@
+<meta charset="utf-8"> 
+
+<style type="text/css">
+    :root {
+        --size: 500px;
+    }
+    .slider {
+        width: 255px;
+        height: 14px;
+    }
+    .imgbox {
+        width: var(--size);
+        height: var(--size);
+    }
+    .row {
+        vertical-align:middle; 
+        display:inline-block;
+    }
+    .border {
+        border:1px solid #DDD;
+    }
+    #upper {
+        z-index: 3;
+        position: absolute;
+    }
+    #lower {
+        z-index: 2;
+        position: absolute;
+    }
+    #origin {
+        z-index: 1;
+        position: absolute;
+        visibility: hidden;
+    }
+    datalist {
+        display: flex;
+        justify-content: space-between;
+        color: grey;
+        font-size: 50%;
+    }
+</style>
+
+<body>
+<div class="imgbox row border">
+    <img class="imgbox" id="upper" src="公羽吉吉-字.png" />
+    <img class="imgbox" id="lower" src="公羽吉吉-背景.png" />
+    <img class="imgbox" id="origin" src="公羽吉吉-背景.png" />
+</div>
+<div class="row">
+    <img id="rgb" style="width: 100px;height: 100px;background: black;margin-left: 100px;">
+    <br>
+    <label id="label" style="margin-left: 20px;">R: 0, G: 0, B: 0, Size: 500</label>
+    <div style="margin-top: 10px;">
+        <label style="color: red;">R</label>
+        <input class="slider" type="range" name="points" min="0" max="255" value="0"/>
+    </div>
+    <div style="margin-top: 10px;">
+        <label style="color: green;">G</label>
+        <input class="slider" type="range" name="points" min="0" max="255" value="0"/>
+    </div>
+    <div style="margin-top: 10px;">
+        <label style="color: blue;">B</label>
+        <input class="slider" type="range" name="points" min="0" max="255" value="0"/>
+    </div>
+    <div style="margin-top: 10px;">
+        <label style="color: black;">S</label>
+        <input class="slider" type="range" name="size" min="100" max="2000" value="500" step="100" list="sizelist" />
+        <datalist id="sizelist">
+            <option value="100">100</option>
+            <option value="500">500</option>
+            <option value="1000">1000</option>
+            <option value="1500">1500</option>
+            <option value="2000">2000</option>
+        </datalist>
+    </div>
+</div>
+</body>
+
+<script type="text/javascript">
+    var inputs = document.getElementsByTagName('input'),
+        label = document.getElementById('label'),
+        img = document.getElementById('rgb'),
+        canvas = document.createElement("canvas"),
+        ctx = canvas.getContext("2d"),
+        image = document.getElementById("origin"),
+        root = document.querySelector(':root');
+
+    for (var i = 0; i < inputs.length; i++) {
+        inputs[i].onchange = function () {
+            label.innerHTML = "R: " + inputs[0].value +", G: " + inputs[1].value + ", B: " + inputs[2].value + ", Size: " + inputs[3].value;
+            img.style.background = "rgb(" + inputs[0].value +"," + inputs[1].value + "," + inputs[2].value+ ")";
+            root.setAttribute('style', '--size: ' + inputs[3].value + 'px');
+
+            canvas.width=image.width;
+            canvas.height=image.height;
+            ctx.drawImage(image, 0, 0, image.width, image.height);
+            var imgd = ctx.getImageData(0, 0, image.width, image.height);
+            var pix = imgd.data;
+
+            for (var i = 0, n = pix.length; i < n; i += 4) {
+                for (var j = 0; j < 3; j++) {
+                    pix[i+j] = 255 - (255-pix[i+j]) * (255-inputs[j].value) / 255;
+                }
+            }
+            ctx.putImageData(imgd, 0, 0);
+
+            var savedImageData = document.getElementById("lower");
+            savedImageData.src = canvas.toDataURL("image/png"); 
+        }
+    }
+</script>
